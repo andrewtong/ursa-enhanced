@@ -3,10 +3,12 @@ This is a preliminary concept that will expand the capabilities of the current e
 
 **It is highly recommend to understand how URSA works before looking at this!**
 
-The purpose of this is to take URSA into a new direction.  There are a number of difficulties associated with the 
-scoring and partitioning methods used that prevent implementation of features that could possibly expedite runtime.  
+The purpose of this is to take URSA into a new direction.  There are a number of difficulties associated with the scoring and
+partitioning methods used that prevent implementation of features that could possibly expedite runtime. 
+
 The reason this project has its own repository is because it plans to take a completely different direction and may prove to 
-be more inefficient than URSA due to the complexity of the newly added algorithms.
+be more inefficient than URSA due to the complexity of the newly added algorithms, which in that case, the original URSA 
+will still be used.
 
 Currently, goals for this project are the following
 
