@@ -1,4 +1,5 @@
 # ursa-enhanced
+#Currently a work in progress#
 This is a preliminary concept that will expand the capabilities of the current existing repository URSA. 
 
 **It is highly recommend to understand how URSA works before looking at this!**
@@ -8,7 +9,9 @@ partitioning methods used that prevent implementation of features that could pos
 
 The reason this project has its own repository is because it plans to take a completely different direction and may prove to 
 be more inefficient than URSA due to the complexity of the newly added algorithms, which in that case, the original URSA 
-will still be used.
+will still be used.  The difference between the two repositories can be explained as followed:
+- URSA attempts to improve the quality of the result by improving word corrections and improving the scoring system.
+- URSA-enhanced attempts to maximize the efficiency of the algorithm by minimizing search redundancies.
 
 Currently, goals for this project are the following
 
