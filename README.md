@@ -39,7 +39,19 @@ operates significantly more quickly.
 
 #How does the algorithm of URSA-enhanced work?#
 
+The theory behind the algorithm is still very tentative, but can be explained in a broad fashion.  There are two main issues
+that need to be solved.  First off, the algorithm seeks where the substring may possibly exist in the main string.  Because
+the algorithm will only scan the main string once, it is imperative to locate the substring as precisely as possible, and
+additionally account for errors that may possibly exist within the main string.  Secondly, the algorithm must check how 
+close of a match, if any, exists between the two strings.  Taking these two factors into consideration, it is completely
+possible to perform fuzzy string matches in linear time.
 
+The sollution to performing this is to 'solve' the main string in terms of the substring.  Similar to how logarithms are 
+applied to exponential equations in order to solve for the exponential value, if a value can be attributed to substring,
+the algorithm can search for this particular value **if** the value can also trigger a response to the algorithm to indicate
+the starting location of the word.  Therefore, a unique hashing equation needs to be able to create a unique code for the 
+substring as well as perform a unique triggering that will indicate where it believes the substring starts within the main
+string.
 
 #Why is this not a continuation of URSA?#
 
