@@ -4,6 +4,8 @@ This is a preliminary concept that will expand the capabilities of the current e
 
 **It is highly recommend to understand how URSA works before looking at this!**
 
+The code and theory behind URSA can be found at : https://github.com/andrewtong/ursa
+
 #Introduction#
 
 URSA-enhanced is a fuzzy string matching algorithms that operates in **linear time-complexity** created using the
