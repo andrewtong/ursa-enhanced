@@ -1,0 +1,9 @@
+v0.1
+
+This version is the introduction of URSA-enhanced.  The theory behind this project can be found in the readme.md file.  Currently
+URSA-enhanced can handle very basic fuzzy string matching cases, and will always run in linear time.  I am very glad to finally
+introduce this project as the theory required a significant amount of work to build up to and this project certainly has 
+a lot of potential.  
+
+URSA-enhanced will be continually improved to handle many more complex cases.  It is still currently in work, but this version
+serves as an introduction to see how the code is layed out and how the estimation processes work.
