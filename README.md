@@ -14,7 +14,9 @@ there is an inherent tradeoff between knowing the location of the to-be matched 
 with the algorithm.  In short, it is very costly in terms of time to determine the precise location of the substring.
 
 An example of my point is explained below; consider the following string and substring:
+
 String: 'The quick brown fox jumped over the lazy dog.'
+
 Substring: 'jumped'
 
 The most obvious way to solve this is to recognize that the word 'jumped' exists between the indexes 20 and 25 inclusive.
