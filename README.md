@@ -74,6 +74,8 @@ pairs of letters by the type of error, if any.
 Performance comparisons between URSA and URSA-enhanced done on the same computer show remarkable results in terms of accuracy
 and speed.  On a per average basis, URSA-enhanced performs significantly faster while maintaining high accuracy rates.
 
+*Content coming soon*
+
 #Why is this not a continuation of URSA?#
 
 The reason this project has its own repository is because it plans to take a completely different direction, primarily 
