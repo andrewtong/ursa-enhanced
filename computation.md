@@ -45,7 +45,8 @@ itself.
   
   This is a small breakdown behind the logic of URSA-enhanced for the correct case.  As demonstrated, because everything
   must be done 'lazily', it is critical that every case must be accounted for, and even the simpliest of cases has a 
-  long thought process behind it.
+  long thought process behind it.  Interestingly enough, the 'correct match' case is the foundation for the remainder of
+  the cases, and a similar process is used once the algorithm determines a potential match exists.
   
 * Case 2 : Partially Correct Match
 
@@ -78,5 +79,26 @@ itself.
   to search beyond the length of the substring.  This ensures that the matched words are scored correctly without the 
   algorithm searching for the last few letters.
   
+  These two possibilities sum of the majority of the 'partially correct' match cases.  Similar to what is done in the   
+  'correct match' case, the scoring is determined based off the distance between the previously computed and the current   
+  computed index.
+  
 * Case 3 : Incorrect Match
-  *to be done*
+  
+  The 'incorrect' match case is a variant of the 'partially correct' match case whereas it utilizes the 'skipped' variable
+  as previously mentioned.  As discussed in the 'partially matched' case, when the algorithm recognizes a letter that 
+  is incorrect in terms of position, it aggregates the skipped variable by 1 to acknowledge the possibility of said variable
+  not existing within the main string.  As a result, two cases may be derived from this scenario.
+
+  The first possibility includes finding the correct letter, but incorrectly positioned at a future index.  This overlaps
+  with the computations done in the 'partially correct' case, where the resulting score is an aggregate of the number of
+  letters that had to be skipped times a variable multiplier and a measure of how many indexes, if any, were skipped.  
+  
+  The second possibility is when the desired letter is never found on a future index, and a subsequent upcoming future pair
+  of letters is encountered as the algorithm iterates through the main string (consider 'compaaater' as an example for the 
+  substring 'computer').  The letter pairs 'pu' / 'ut' is never found, while the next correct letter pair 'te' is the next to
+  appear.  Similar to how the skipped variable was used in the other cases, a score based off the number of letters skipped 
+  times a given multiplier will be added to the string's score.  However, in this case, it is important to recognize that the
+  letter pair 'ut' never existed within the string.  Therefore, the algorithm recognizes (via the hashmap) that the letter 
+  pair 'te' is two indexes ahead of the previous correct letter pair 'mp' and will add a second score, similar to the method
+  used in the 'correct match' case to account for the missing index.
