@@ -4,6 +4,7 @@
 **It is highly recommend to understand how URSA works before looking at this!**
 
 The code and theory behind URSA can be found at : https://github.com/andrewtong/ursa
+
 The theory behind URSA-enhanced is detailed in the README and computation markdown files.
 
 #Introduction#
