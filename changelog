@@ -1,3 +1,16 @@
+v0.2 June 5th 2015
+
+URSA-enhanced now supports most error types and performs functionally with minimal bugs.  The predictions have all been done
+via lazy evaluatons and hashmap lookups allowing the algorithm to operate in linear time.  Scoring is not perfectly accurate 
+at the moment but will likely be fixed in the nearby future.  The source code has been sigificantly updated since the previous
+version to account for many more error types including letter swaps, letter corrections, missing indexes, and the handling
+of duplicate letters/indexes.  The details behind the hashing equations and how the hashmap operates is found in the 
+"computation" markdown file.
+
+The explanation behind the theory of URSA-enhanced is now more detailed in the readme and provides an explanation behind the 
+approach of the problem.  
+
+
 v0.1
 
 This version is the introduction of URSA-enhanced.  The theory behind this project can be found in the readme.md file.  Currently

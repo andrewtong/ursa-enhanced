@@ -11,172 +11,209 @@ from math import log10
 #example, it would be the word 'dog'/
 
 
-class ListInfo:
-    def __init__(self,divided,index):
-        self.divided = divided
-        self.index = index
-
-def score(main, substring):
-    result = compare(main, substring)
-    return result
-#     if result > 2*len(substring) or result is 0:
-#         return 0
-#     else:
-#         #return int(100 - 76.87 * log10(result*10/len(substring)))
-#         return result
-    
-
-def compare(string, substring):
-    #The input is initially filtered, than it is partitioned.  The number of partitions is dependent on
-    #whether an answer is found and also the length of the substring.  If a match is found, it will stop
-    #otherwise, it procedes with latter letter partitions until the algorithm knows there can be no
-    #more possible matches.
-    string = filterstringpattern(string)
-    
-    #This sequence will parse every character in the substring, than create a dictionary with values
-    uniquelettervalues = {}
-    i = 1
-    for char in substring:
-        if char not in uniquelettervalues.keys():
-            uniquelettervalues[char] = i
-            i += 1
-    
-    substringhashvalues = []
-    
-    #retrieves the score value associated with the letter
-    def getlettervalue(l):
-        if l not in uniquelettervalues.keys():
+class CharacterInfo:
+    def __init__(self,substring):
+        self.substring = substring
+        self.lettervaluemap = CharacterInfo.scoreletters(self)
+        self.substringmap = CharacterInfo.mapsubstring(self)
+        
+    def scoreletters(self):
+        i = 1
+        self.lettervaluemap = {}
+        for char in self.substring:
+            if char not in self.lettervaluemap:
+                #The values associated with the letters must be unique to prevent dictionary key conflicts.
+                self.lettervaluemap[char] = (i + len(self.substring))*(i + len(self.substring)) - i
+                i += 1
+        
+        return self.lettervaluemap
+                
+    def getletterscore(self, letter):
+        if letter not in self.lettervaluemap:
             return 0
         else:
-            return uniquelettervalues[l]
+            return self.lettervaluemap[letter]
+                
+    def mapsubstring(self):
+        self.substringmap = {}        
+        for j in range(0, len(self.substring)):
+            try:
+                sumvalue = CharacterInfo.getletterscore(self, self.substring[j]) + CharacterInfo.getletterscore(self, self.substring[j+1])
+                diffvalue = CharacterInfo.getletterscore(self, self.substring[j]) - CharacterInfo.getletterscore(self, self.substring[j+1])
+#                 if self.substringmap[(sumvalue, diffvalue)] in substringmap:
+#                     self.substringmap[(sumvalue, diffvalue)].append(j)
+#                 else:
+#                     self.substringmap[(sumvalue, diffvalue)] = j
+            except IndexError:
+                return self.substringmap
+#                 sumvalue = CharacterInfo.getletterscore(self, self.substring[j])
+#                 diffvalue = CharacterInfo.getletterscore(self, self.substring[j])
+            if (sumvalue, diffvalue) in self.substringmap:
+                self.substringmap[(sumvalue, diffvalue)].append(j + 1)
+            else:
+                self.substringmap[(sumvalue, diffvalue)] = [j + 1]            
+                
+def score(main, substring):
+    result = compare(main, substring)
     
+    if result < 0 or result > 2*len(substring):
+        return 0
+    else:
+        #return (1 - (result/(2*len(substring)))**2)/100
+        percentcorrect = max(5.0, 100*(1 -result/(1.5*len(substring))))
+        return int(100 - 76.87 * log10(100/percentcorrect))
+
+def mapsubstring(substring):
     #Now the substring needs to be interpreted as a score, using the above scoring convention in uniquelettervalues.
+    substringmap = {}
     for j in range(0,len(substring)):
-        
-        #Priority in terms of unit, tens, and hundreds
-        #Hundreds, units, tens
         try:
-            if j is 0:
-                #check previous digit, which you will assume is zero
-                #it will indicate that search is off, so whenever the search is flipped on, then the hashvalue is automatically
-                #set to 1
-                substringhashvalues.append(1)
-                
-            else:
-                if substringhashvalues[j-1] >= 10:
-                    unitvalue = substringhashvalues[j-1]%10
-                else:
-                    unitvalue = substringhashvalues[j-1]
-                substringhashvalues.append(unitvalue + 10*uniquelettervalues[substring[j+1]] + 100*uniquelettervalues[substring[j]])
-                
+            sumvalue = substring[j] + substring[j + 1]
+            diffvalue = abs(substring[j] - substring[j + 1])
+            substringvalue = (sumvalue, diffvalue)
+            substringmap[j] = substringvalue
         except IndexError:
-            #in this case you assume that the following letter is a blank, since it would be the following letter in the string
-            #'blank' letters are associated with a score of 0
-            if substringhashvalues[j-1] >= 10:
-                unitvalue = substringhashvalues[j-1]%10
-            else:
-                unitvalue = substringhashvalues[j-1]            
-            substringhashvalues.append(unitvalue + 100*uniquelettervalues[substring[j]])
-        
-#         print(substringhashvalues)
+            substringvalue = (substring[j], substring[j])
+            substringmap[j] = substringvalue
+    return substringmap
+
+def compare(string,substring):
+    string = filterstringpattern(string)
+    
+    ci = CharacterInfo(substring)
+    currentindex = 1
     objectivescore = 0
-    #Scoring will work on the following basis:
+    skipped = 0
     
-    #For the first character:
-    #Hundreds: 0 if exists substring, 1 if not
-    #Tens: 0 if exists in substring, 1 if not
-    
-    #For the last character:
-    #Hundreds: 0 if matching, 1 if not
-    #Tens: 0 if matching, 1 if not
-    #Units: 0 if matching, 1 if not
-    
-    #For all other characters:
-    #Hundreds: 0 if matching, 1 if not
-    #Unit: 0 if matching, 1 if not
-    stringhashvalues = []
-    searching = False
-    searchindex = 0
-    for k in range(0, len(string)):
-#         print(stringhashvalues)
-#         print('Score: ' + str(objectivescore) + ' Letter: ' + str(string[k]))
+    #prevcharinfo (previous character letterscore, second previous character letterscore, previous index)
+    #at the new index, it calculates the new sum and difference
+    #previous index is used to compare against current index, which subsequently produces a score
+    prevcharinfo = (-1, -1, 0)
+
+    for char in string:
+
         
-        #You first check where to start, which is done by finding a matching letter to the substring
-        if string[k] in uniquelettervalues.keys() or searching is True:
-            if k is 0 or searchindex is 0:
-                #First character case
-                
-                #Calculate stringhashvalue based off current and following letter
-                currentletterhashvalue = 10*getlettervalue(string[k+1]) + 100*getlettervalue(string[k])
-                #Compare it to the substring hashvalue using searchindex than compute a difference value
-                if (currentletterhashvalue%100)/10 > 0:
-                #If the difference value is acceptable, than turn searching to true
-                    searching = True
-                    searchindex += 1
-                    if (currentletterhashvalue%100)/10 - getlettervalue(string[k+1]):
-                        objectivescore += 1
-                        
-                    stringhashvalues.append(1)
-            elif searchindex is len(substring)-1:
-                #end case, calculate stringhashvalue based off end condition, compare to last
-                
-                if stringhashvalues[searchindex-1] >= 10:
-                    unitvalue = stringhashvalues[searchindex-1]%10
-                else:
-                    unitvalue = stringhashvalues[searchindex-1]
-                    
-                currentletterhashvalue = unitvalue + 100*getlettervalue(string[k])
-                difference = abs(currentletterhashvalue - substringhashvalues[searchindex])
-                if difference%100 > 0:
-                    objectivescore += 1
-                if difference > 99:
-                    objectivescore += 1
-                
-                stringhashvalues.append(currentletterhashvalue)
-                    
-                return objectivescore    
+        #so if we are scanning the first letter in the main string, only the previous letterscore is found, and the 
+        #algorithm moves to the next character
+        if prevcharinfo[0] is -1:
+            currentcharvalue = ci.getletterscore(char)
+            prevcharinfo = (currentcharvalue, -1, 0)
+            continue
+        
+        #if the current character is not the first letter, than a sum and diff value are calculated to check for accuracy
+        #prev char info is updated depending on whether there is a match
+        else:
+            currentcharvalue = ci.getletterscore(char)
+            sumvalue = prevcharinfo[0] + currentcharvalue
+            diffvalue = prevcharinfo[0] - currentcharvalue
+           
+        #check for correct position or if the position of within the substring        
+        if (sumvalue, diffvalue) in ci.substringmap:
+            
+            if len(ci.substringmap[(sumvalue, diffvalue)]) > 1:
+                currentindex = ci.substringmap[(sumvalue, diffvalue)][0][0]
+                ci.substringmap[(sumvalue, diffvalue)].pop(0)
+            else:   
+                currentindex = ci.substringmap[(sumvalue, diffvalue)][0]   
+            
+            #correct match exists, proceed to next index              
+            if char is substring[currentindex]:
+
+                objectivescore += 0
+                prevcharinfo = (currentcharvalue, prevcharinfo[0], currentindex)
+            #search has not started, this index will be deemed as the first index, iff current index is less than 1/2 of the
+            #length of the substring
+            elif prevcharinfo[2] is 0 and currentindex <= 0.5*len(substring):
+
+                objectivescore += 1.5*(currentindex)
+                prevcharinfo = (currentcharvalue, 0, currentindex)
+            #substring search has started, but the index is out of place
+            #if calculated index is less than current index, then...
+            #if calculated index is greater than current index, then...
             else:
-                additionalscore = 0
-                
-                if stringhashvalues[searchindex-1] >= 10:
-                    unitvalue = stringhashvalues[searchindex-1]%10
+                if currentindex > prevcharinfo[2]:
+                    objectivescore += (currentindex - prevcharinfo[2] - 1)*1
+                    prevcharinfo = (currentcharvalue, prevcharinfo[0], currentindex)
                 else:
-                    unitvalue = stringhashvalues[searchindex-1]
+                    objectivescore += 2
+                    prevcharinfo = (prevcharinfo[0], prevcharinfo[1], prevcharinfo[2])
+            
+        #check for swapped position
+        elif (sumvalue, -diffvalue) in ci.substringmap: # and char is substring[currentindex] and prevcharinfo[0] is not -1:
+
+            if len(ci.substringmap[(sumvalue, -diffvalue)]) > 1:
+                currentindex = ci.substringmap[(sumvalue, -diffvalue)][0][0]
+                ci.substringmap[(sumvalue, -diffvalue)].pop(0)
+            else:
+                currentindex = ci.substringmap[(sumvalue, -diffvalue)][0]
+
+            sv = prevcharinfo[1] + currentcharvalue
+            dv = prevcharinfo[1] - currentcharvalue
+
+            if (sv, dv) in ci.substringmap:
+                objectivescore += 0.5*(currentindex - ci.substringmap[(sv, dv)][0])
+            else:
+                objectivescore += 1.5*(currentindex - prevcharinfo[2])
                 
-                #This is the case where the letter is neither first nor the last one
-                #Calculate stringhashvalue based off current, previous, and following letter
-                currentletterhashvalue = unitvalue + 10*getlettervalue(string[k+1]) + 100*getlettervalue(string[k])
-                
-                #Compare it to the substring hashvalue using searchindex, compute difference value
-                difference = abs(currentletterhashvalue - substringhashvalues[searchindex])
-                
-                #Need to check whether current index characters could possibly be a false index (i.e. filler characters)
-                if difference > 0.25*currentletterhashvalue:
-                    #In this case, we assume that there is a mismatch, and proceed to check the next character against the same
-                    #index.
-                    additionalscore += 2
-                else:
-                    #In this case, we assume that the indexes are a match, and can be compared to check for string accuracy
-                    if difference%100 > 0:
-                        additionalscore += 1
-                    if int(difference%10) > 0:
-                        additionalscore += 1
-                    if difference > 99:
-                        additionalscore += 2
-                
-                #Case where objective score is too high, turn searching off, reset search index to 1, reset objectivescore
-                if objectivescore > 0.5*len(substring):
-                    searchindex = 1
-                    objectivescore = 0
-                else:
-                #Case where additionalscore is acceptable, move index to the next one, add additionalscore to objectivescore
-                    objectivescore += additionalscore
-                    searchindex += 1
-                    stringhashvalues.append(currentletterhashvalue)
-                
-                
+            #check if current index is 1 greater than previous index
+            prevcharinfo = (ci.getletterscore(substring[currentindex]), ci.getletterscore(substring[currentindex - 1]), currentindex)
+            
+        #performs a one off check (typically where there is a misc. letter in between two correctly positioned letters)
+        elif (prevcharinfo[1] + currentcharvalue, prevcharinfo[1] - currentcharvalue) in ci.substringmap:
+            if len(ci.substringmap[(prevcharinfo[1] + currentcharvalue, prevcharinfo[1] - currentcharvalue)]) > 1:
+                currentindex = ci.substringmap[(prevcharinfo[1] + currentcharvalue, prevcharinfo[1] - currentcharvalue)][0][0]
+                ci.substringmap[(prevcharinfo[1] + currentcharvalue, prevcharinfo[1] - currentcharvalue)].pop(0)
+            else:
+                currentindex = ci.substringmap[(prevcharinfo[1] + currentcharvalue, prevcharinfo[1] - currentcharvalue)][0]
+            objectivescore += 1
+            prevcharinfo = (currentcharvalue, prevcharinfo[1], currentindex)
+                  
+        #case where current character is correct, but previous character is incorrect
+        elif char is substring[currentindex + 1]:
+            #first check if in combination with prev char creates a actual fit
+                #this is checked by the first check, since it calculates current character and the one from prevchar value
+            #if not, then there could be a missing letter in between, in which you assume to be true
+            
+            if prevcharinfo[0] > 0 and currentcharvalue > prevcharinfo[0]:
+                #valid character in word but is incorrect (e.x. a letter skip)
+                objectivescore += 0.5
+            
+            else: 
+                #random character
+                objectivescore += 1.5
+            prevcharinfo = (currentcharvalue, prevcharinfo[0], prevcharinfo[2] + 1)
         
-    return 0
+        #case where current character is incorrect, but search has began
+        elif char is not substring[currentindex + 1] and prevcharinfo[0] > 0:
+            #prevcharinfo should not change, since this is essentially a blank filler character
+            #prevcharinfo = (currentcharvalue) 
+            if currentcharvalue > 0:
+                objectivescore += 0.8 + skipped*0.5
+                #prevcharinfo = (currentcharvalue, prevcharinfo[0], prevcharinfo[2])
+            else:
+                objectivescore += 1.8 + skipped*0.3
+            
+            skipped += 2
+
+            if skipped + currentindex + 1 >= len(substring):
+                return objectivescore    
+        else: 
+            currentindex = 0
+            prevcharinfo = (currentcharvalue, prevcharinfo[0], currentindex)
+
+    
+        if currentindex is len(substring) - 1:
+            #the check for the last two lettersis performed, if the last letter doesn't exist, it would count as a one off anyways
+            return objectivescore
+        
+        if objectivescore >= 1.5*len(substring):
+            
+            prevcharinfo = (currentcharvalue, 0, 0)
+            objectivescore = 0
+        
+    #if no match is found
+    return -1
+
        
 #This function filters out irrelevant characters from the string pattern
 def filterstringpattern(strg):

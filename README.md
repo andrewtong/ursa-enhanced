@@ -1,10 +1,11 @@
 # ursa-enhanced
-#Currently a work in progress#
-This is a preliminary concept that will expand the capabilities of the current existing repository URSA. 
+#Currently a work in progress (scoring system still needs a bit of work)#
 
 **It is highly recommend to understand how URSA works before looking at this!**
 
 The code and theory behind URSA can be found at : https://github.com/andrewtong/ursa
+
+The theory behind URSA-enhanced is detailed in the README and computation markdown files.
 
 #Introduction#
 
@@ -73,6 +74,8 @@ pairs of letters by the type of error, if any.
 
 Performance comparisons between URSA and URSA-enhanced done on the same computer show remarkable results in terms of accuracy
 and speed.  On a per average basis, URSA-enhanced performs significantly faster while maintaining high accuracy rates.
+
+*Content coming soon*
 
 #Why is this not a continuation of URSA?#
 
