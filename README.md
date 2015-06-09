@@ -1,5 +1,4 @@
 # ursa-enhanced
-#Currently a work in progress (scoring system still needs a bit of work)#
 
 **It is highly recommend to understand how URSA works before looking at this!**
 
