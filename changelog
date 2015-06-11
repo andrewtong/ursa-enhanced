@@ -20,6 +20,8 @@ of letters has been slightly bumped up to help the algorithm filter out incorrec
 
 Fixed a scoring error associated with consecutive identical letters that was not being correctly registered.
 
+Fixed an error where the 'skipped' variable was not resetting, resulting significant errors for longer strings.
+
 v0.2 June 5th 2015
 
 URSA-enhanced now supports most error types and performs functionally with minimal bugs.  The predictions have all been done
