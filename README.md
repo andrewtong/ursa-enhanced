@@ -74,7 +74,25 @@ pairs of letters by the type of error, if any.
 Performance comparisons between URSA and URSA-enhanced done on the same computer show remarkable results in terms of accuracy
 and speed.  On a per average basis, URSA-enhanced performs significantly faster while maintaining high accuracy rates.
 
-*Content coming soon*
+```
+print(score('URSA-enhanced is capable of performing fuzzy string matches at remarkable speeds.', 'fuzzy'))
+100
+```
+
+```
+print(score('Similar to URSA, basic errors can easily be recgnized.', 'recognized'))
+95
+```
+
+```
+print(score('Errors of higher comlpexty are now solved faster with the same precise accuracy.', 'complexity'))
+48
+```
+
+```
+print(score('URSA-enhanced can also accurately determine whether a word is not present.', 'python'))
+0
+```
 
 #Why is this not a continuation of URSA?#
 
