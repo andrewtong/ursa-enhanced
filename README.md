@@ -41,7 +41,7 @@ pairs of letters by the type of error, if any.
 
 #Performance#
 
-Performance comparisons between URSA and URSA-enhanced done on the same computer show remarkable results in terms of accuracy
+Performance comparisons on URSA-enhanced done on the same computer as URSA show remarkable results in terms of accuracy
 and speed.  On a per average basis, URSA-enhanced performs significantly faster while maintaining high accuracy rates.
 
 ```
@@ -63,6 +63,11 @@ print(score('Errors of higher comlpexty are now solved faster with the same prec
 print(score('URSA-enhanced can also accurately determine whether a word is not present.', 'python'))
 0
 ```
+
+Using IPython, the above queries were timed and the following results illustrate a significant decrease in runtime due 
+to the efficiency of the algorithm.
+
+*coming soon*
 
 #Why is this not a continuation of URSA?#
 
