@@ -22,6 +22,8 @@ Fixed a scoring error associated with consecutive identical letters that was not
 
 Fixed an error where the 'skipped' variable was not resetting, resulting significant errors for longer strings.
 
+Limited the number of indexes that can be jumped without severe penalty in score.
+
 v0.2 June 5th 2015
 
 URSA-enhanced now supports most error types and performs functionally with minimal bugs.  The predictions have all been done
