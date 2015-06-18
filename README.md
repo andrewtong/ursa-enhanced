@@ -1,11 +1,10 @@
 # ursa-enhanced
-#Currently a work in progress (scoring system still needs a bit of work)#
 
 **It is highly recommend to understand how URSA works before looking at this!**
 
 The code and theory behind URSA can be found at : https://github.com/andrewtong/ursa
 
-The theory behind URSA-enhanced is detailed in the README and computation markdown files.
+The theory behind URSA-enhanced is detailed in the theory file..
 
 #Introduction#
 
@@ -14,40 +13,10 @@ fundamentals of what I've learned while designing URSA.  Based off my understand
 there is an inherent tradeoff between knowing the location of the to-be matched substring, and the time complexity associated
 with the algorithm.  In short, it is very costly in terms of time to determine the precise location of the substring.
 
-An example of my point is explained below; consider the following string and substring:
-
-String: 'The quick brown fox jumped over the lazy dog.'
-
-Substring: 'jumped'
-
-The most obvious way to solve this is to recognize that the word 'jumped' exists between the indexes 20 and 25 inclusive.
-I can then compare the word 'jumped' in the string, to the substring 'jumped'.  However, this is incredibly inefficient
-because the time required to find the exact location of the substring within the string is incredibly costly in terms of 
-performance, since there is no efficient means to pinpoint the location of the substring.  Many existing fuzzy string 
-algorithms circumvent this issue by attempting to partition the string in an attempt to guess the location of the substring.
-An example of this would be assuming that words are split by a whitespace.  However, the fallacy behind this is that 
-searching for words that are clustered between letters (for example, 'foxjumpedover') would not be possible.  This type of 
-approach toward solving the fuzzy string matching problem can be interpreted as two processes, locating the correct 
-position of the substring as well as determining the accuracy between the given word and the correct word, both of which when
-done in the most basic approach operate in polynomial time.
-
-I may take this a step further and attempt to find the location of the start of the substring.  This is exactly how URSA
-operates.  Instead of partitioning by whitespaces, I attempt to find where the substring may possibly start, and partition
-by letters given in the substring.  This is substantially more effective since the partitioning can be optimally performed
-in linear time.   The biggest advantage of URSA is that it could perform fuzzy string matching on an per average basis 
-significantly faster than existing algorithms without achieving very precise results.  If we break URSA down to two steps, 
-such as shown in the previous example, determining the location and calculating the accuracy of the substring can be 
-optimally performed in pseduo-linear time complexity, which provides a significant advantage in terms of performance.  
-Further detail regarding URSA can be found at https://github.com/andrewtong/ursa
-
-However, in the worst case scenarios, URSA can still be pretty inefficient, since it may have to partition the main string
-several times, and may even find no result at all.  To remedy this, URSA-enhanced is designed to only parse the main string
-once, and then proceed to determine whether the substring exists either as a fuzzy string match within the main string.  The
-difficulty behind this is that in the only way for this algorithm to operate in linear time is to never precisedly know
-where the substring starts or ends.  Because of this, the quality of the result is not as 'accurate' but the algorithm
-operates significantly more quickly.  Being able to successfully solve the fuzzy string matching problem in linear time 
-essentially reduces two processes that the worst case scenario operate in polynomial time complexity to a single process that
-operates in linear time.
+Fuzzy string matches can be perceived as a two step process.  The first is determining the location of the substring within the main string.  Afterwards, it is then possible to compare the substring to the desired string to compute accuracy.  
+URSA-enhanced takes a unique approach to this by performing both processes at once.  The concept behind this is that the
+algorithm consistently attempts to estimate what the current index is, and calculates an aggregate score based off the
+difference between the previous and current index.
 
 #How does the algorithm of URSA-enhanced work?#
 
@@ -72,10 +41,44 @@ pairs of letters by the type of error, if any.
 
 #Performance#
 
-Performance comparisons between URSA and URSA-enhanced done on the same computer show remarkable results in terms of accuracy
+Performance comparisons on URSA-enhanced done on the same computer as URSA show remarkable results in terms of accuracy
 and speed.  On a per average basis, URSA-enhanced performs significantly faster while maintaining high accuracy rates.
 
-*Content coming soon*
+```
+print(score('URSA-enhanced is capable of performing fuzzy string matches at remarkable speeds.', 'fuzzy'))
+100
+```
+
+```
+print(score('Similar to URSA, basic errors can easily be recgnized.', 'recognized'))
+95
+```
+
+```
+print(score('Errors of higher comlpexty are now solved faster with the same precise accuracy.', 'complexity'))
+48
+```
+
+```
+print(score('URSA-enhanced can also accurately determine whether a word is not present.', 'python'))
+0
+```
+
+Using IPython, I took two queries from the examples within the readme in URSA and recorded their respective runtimes.  The
+results illustrate that it is possible to achieve up to a 50% decrease in runtime.
+
+```
+%timeit score('The quick brown fox jmuped over the lazy dog.','jumped')
+10000 loops, best of 3: 193 μs per loop
+```
+
+```
+%timeit score('Sally sells seashells down by the seaschore.','seashore')
+1000 loops, best of 3: 339 μs per loop
+```
+
+The first example demonstrated an approximate 30% decrease in runtime (193 μs compared to 307 μs), while the second example
+had an approximate 50% decrease in runtime (339 μs compared to 758 μs).
 
 #Why is this not a continuation of URSA?#
 

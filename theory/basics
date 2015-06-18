@@ -1,0 +1,39 @@
+As mentioned in the introduction, a fuzzy string match can be broken down into two processes.  The first process is locating
+the substring within the main string, while the second would be performing a compuation to determine the accuracy of the
+string.
+
+To further demonstrate this example and the various ways a fuzzy string match can be performed, consider the following string 
+and substring:
+
+String: 'The quick brown fox jumped over the lazy dog.'
+
+Substring: 'jumped'
+
+The most obvious way to solve this is to recognize that the word 'jumped' exists between the indexes 20 and 25 inclusive.
+I can then compare the word 'jumped' in the string, to the substring 'jumped'.  However, this is incredibly inefficient
+because the time required to find the exact location of the substring within the string is incredibly costly in terms of 
+performance, since there is no efficient means to pinpoint the location of the substring.  Many existing fuzzy string 
+algorithms circumvent this issue by attempting to partition the string in an attempt to guess the location of the substring.
+An example of this would be assuming that words are split by a whitespace.  However, the fallacy behind this is that 
+searching for words that are clustered between letters (for example, 'foxjumpedover') would not be possible.  This type of 
+approach toward solving the fuzzy string matching problem can be interpreted as two processes, locating the correct 
+position of the substring as well as determining the accuracy between the given word and the correct word, both of which when
+done in the most basic approach operate in polynomial time.
+
+I may take this a step further and attempt to find the location of the start of the substring.  This is exactly how URSA
+operates.  Instead of partitioning by whitespaces, I attempt to find where the substring may possibly start, and partition
+by letters given in the substring.  This is substantially more effective since the partitioning can be optimally performed
+in linear time.   The biggest advantage of URSA is that it could perform fuzzy string matching on an per average basis 
+significantly faster than existing algorithms without achieving very precise results.  If we break URSA down to two steps, 
+such as shown in the previous example, determining the location and calculating the accuracy of the substring can be 
+optimally performed in pseduo-linear time complexity, which provides a significant advantage in terms of performance.  
+Further detail regarding URSA can be found at https://github.com/andrewtong/ursa
+
+However, in the worst case scenarios, URSA can still be pretty inefficient, since it may have to partition the main string
+several times, and may even find no result at all.  To remedy this, URSA-enhanced is designed to only parse the main string
+once, and then proceed to determine whether the substring exists either as a fuzzy string match within the main string.  The
+difficulty behind this is that in the only way for this algorithm to operate in linear time is to never precisedly know
+where the substring starts or ends.  Because of this, the quality of the result is not as 'accurate' but the algorithm
+operates significantly more quickly.  Being able to successfully solve the fuzzy string matching problem in linear time 
+essentially reduces two processes that the worst case scenario operate in polynomial time complexity to a single process that
+operates in linear time.

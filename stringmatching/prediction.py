@@ -40,19 +40,13 @@ class CharacterInfo:
             try:
                 sumvalue = CharacterInfo.getletterscore(self, self.substring[j]) + CharacterInfo.getletterscore(self, self.substring[j+1])
                 diffvalue = CharacterInfo.getletterscore(self, self.substring[j]) - CharacterInfo.getletterscore(self, self.substring[j+1])
-#                 if self.substringmap[(sumvalue, diffvalue)] in substringmap:
-#                     self.substringmap[(sumvalue, diffvalue)].append(j)
-#                 else:
-#                     self.substringmap[(sumvalue, diffvalue)] = j
             except IndexError:
                 return self.substringmap
-#                 sumvalue = CharacterInfo.getletterscore(self, self.substring[j])
-#                 diffvalue = CharacterInfo.getletterscore(self, self.substring[j])
             if (sumvalue, diffvalue) in self.substringmap:
                 self.substringmap[(sumvalue, diffvalue)].append(j + 1)
             else:
-                self.substringmap[(sumvalue, diffvalue)] = [j + 1]            
-                
+                self.substringmap[(sumvalue, diffvalue)] = [j + 1]
+
 def score(main, substring):
     result = compare(main, substring)
     
@@ -60,7 +54,7 @@ def score(main, substring):
         return 0
     else:
         #return (1 - (result/(2*len(substring)))**2)/100
-        percentcorrect = max(5.0, 100*(1 -result/(1.5*len(substring))))
+        percentcorrect = max(5.0, 100*(1 - result/(1.5*len(substring))))
         return int(100 - 76.87 * log10(100/percentcorrect))
 
 def mapsubstring(substring):
@@ -81,6 +75,7 @@ def compare(string,substring):
     string = filterstringpattern(string)
     
     ci = CharacterInfo(substring)
+    basecopy = ci.substringmap
     currentindex = 1
     objectivescore = 0
     skipped = 0
@@ -91,7 +86,6 @@ def compare(string,substring):
     prevcharinfo = (-1, -1, 0)
 
     for char in string:
-
         
         #so if we are scanning the first letter in the main string, only the previous letterscore is found, and the 
         #algorithm moves to the next character
@@ -106,20 +100,33 @@ def compare(string,substring):
             currentcharvalue = ci.getletterscore(char)
             sumvalue = prevcharinfo[0] + currentcharvalue
             diffvalue = prevcharinfo[0] - currentcharvalue
-           
+        
+        if (prevcharinfo[1] + currentcharvalue, prevcharinfo[1] - currentcharvalue) in ci.substringmap: 
+            if ci.substringmap[(prevcharinfo[1] + currentcharvalue, prevcharinfo[1] - currentcharvalue)][0]*prevcharinfo[2] is 1:
+                objectivescore = 0 #temp fix until i figure out this swap issue
+                sumvalue = prevcharinfo[1] + currentcharvalue
+                diffvalue = prevcharinfo[1] - currentcharvalue                
+                prevcharinfo = (prevcharinfo[1], 0, 0)
+                ci.substringmap = basecopy
+                
         #check for correct position or if the position of within the substring        
         if (sumvalue, diffvalue) in ci.substringmap:
-            
             if len(ci.substringmap[(sumvalue, diffvalue)]) > 1:
                 currentindex = ci.substringmap[(sumvalue, diffvalue)][0][0]
                 ci.substringmap[(sumvalue, diffvalue)].pop(0)
             else:   
-                currentindex = ci.substringmap[(sumvalue, diffvalue)][0]   
-            
-            #correct match exists, proceed to next index              
-            if char is substring[currentindex]:
+                currentindex = ci.substringmap[(sumvalue, diffvalue)][0]
 
-                objectivescore += 0
+            #index jump   
+            if currentindex - prevcharinfo[2] > 1 and currentindex - prevcharinfo[2] <= int(len(substring)/2):
+                objectivescore += (currentindex - prevcharinfo[2] - skipped/2)*1.2
+                prevcharinfo = (currentcharvalue, prevcharinfo[0], currentindex)    
+            #correct match exists, proceed to next index  
+            elif char is substring[currentindex]:
+                if currentindex is prevcharinfo[2]:
+                    objectivescore += 1.1
+                else:
+                    objectivescore += 0
                 prevcharinfo = (currentcharvalue, prevcharinfo[0], currentindex)
             #search has not started, this index will be deemed as the first index, iff current index is less than 1/2 of the
             #length of the substring
@@ -128,15 +135,9 @@ def compare(string,substring):
                 objectivescore += 1.5*(currentindex)
                 prevcharinfo = (currentcharvalue, 0, currentindex)
             #substring search has started, but the index is out of place
-            #if calculated index is less than current index, then...
-            #if calculated index is greater than current index, then...
             else:
-                if currentindex > prevcharinfo[2]:
-                    objectivescore += (currentindex - prevcharinfo[2] - 1)*1
-                    prevcharinfo = (currentcharvalue, prevcharinfo[0], currentindex)
-                else:
-                    objectivescore += 2
-                    prevcharinfo = (prevcharinfo[0], prevcharinfo[1], prevcharinfo[2])
+                objectivescore += 2
+                prevcharinfo = (prevcharinfo[0], prevcharinfo[1], prevcharinfo[2])
             
         #check for swapped position
         elif (sumvalue, -diffvalue) in ci.substringmap: # and char is substring[currentindex] and prevcharinfo[0] is not -1:
@@ -167,49 +168,36 @@ def compare(string,substring):
                 currentindex = ci.substringmap[(prevcharinfo[1] + currentcharvalue, prevcharinfo[1] - currentcharvalue)][0]
             objectivescore += 1
             prevcharinfo = (currentcharvalue, prevcharinfo[1], currentindex)
-                  
-        #case where current character is correct, but previous character is incorrect
-        elif char is substring[currentindex + 1]:
-            #first check if in combination with prev char creates a actual fit
-                #this is checked by the first check, since it calculates current character and the one from prevchar value
-            #if not, then there could be a missing letter in between, in which you assume to be true
-            
-            if prevcharinfo[0] > 0 and currentcharvalue > prevcharinfo[0]:
-                #valid character in word but is incorrect (e.x. a letter skip)
-                objectivescore += 0.5
-            
-            else: 
-                #random character
-                objectivescore += 1.5
-            prevcharinfo = (currentcharvalue, prevcharinfo[0], prevcharinfo[2] + 1)
         
         #case where current character is incorrect, but search has began
         elif char is not substring[currentindex + 1] and prevcharinfo[0] > 0:
-            #prevcharinfo should not change, since this is essentially a blank filler character
-            #prevcharinfo = (currentcharvalue) 
             if currentcharvalue > 0:
                 objectivescore += 0.8 + skipped*0.5
-                #prevcharinfo = (currentcharvalue, prevcharinfo[0], prevcharinfo[2])
+                prevcharinfo = (currentcharvalue, prevcharinfo[0], prevcharinfo[2] + 1)
             else:
                 objectivescore += 1.8 + skipped*0.3
             
             skipped += 2
 
-            if skipped + currentindex + 1 >= len(substring):
+            if skipped + currentindex + 1 >= len(substring) and currentindex >= 0.5*len(substring):
                 return objectivescore    
         else: 
             currentindex = 0
-            prevcharinfo = (currentcharvalue, prevcharinfo[0], currentindex)
+            objectivescore = 0
+            prevcharinfo = (currentcharvalue, 0, currentindex)
+            ci.substringmap = basecopy
 
     
         if currentindex is len(substring) - 1:
-            #the check for the last two lettersis performed, if the last letter doesn't exist, it would count as a one off anyways
+            #the check for the last two letters is performed, if the last letter doesn't exist, it would count as a one off anyways
             return objectivescore
         
         if objectivescore >= 1.5*len(substring):
             
             prevcharinfo = (currentcharvalue, 0, 0)
             objectivescore = 0
+            ci.substringmap = basecopy
+            skipped = 0
         
     #if no match is found
     return -1

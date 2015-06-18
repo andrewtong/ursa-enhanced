@@ -1,3 +1,29 @@
+v0.3
+
+Corrected the hashmap to handle duplicate letters by resetting the map keys whenever a failed check occurs, which prevents
+future indexes from being incorrectly scored.  Fixing this issue allows for letters to be correctly scored and for the hashmap
+to accurately recognize the correct positions of letter pairs while preventing duplicate keys from occuring in the map.
+
+Fixed an issue with 'skipped' variable not accounting for the current letter, which prevents the algorithm to correctly 
+register the current index.  However, there is a 'gray area' associated with this, since permiting the curent index to 
+be registered as the last-seen character makes it easy to 'trick' the algorithm and result in a incorrect index computation
+on the subsequent character.  The reason this occurs is that at any given character the algorithm must immediately compute
+whether it believes it is part of the substring or not, and because one of the constraints of the project is to solve it in
+linear time, there is no easy way to determine whether the current index is actually relevant without scanning adjacent 
+letters.  This issue will be looked into more in the future, but the pros of this fix seem to outweigh the cons.
+
+Scoring on the 'correct match' case where there is an index jump has been fixed to be more accurate.  Previously the 
+equation was faulty in the sense that it would only register jumps that were of 2 or more indexes.  
+
+Scoring has been slightly adjusted to help with discerning between incorrect words.  The penalty for an incorrect letter/pair
+of letters has been slightly bumped up to help the algorithm filter out incorrect words more efficiently.  
+
+Fixed a scoring error associated with consecutive identical letters that was not being correctly registered.
+
+Fixed an error where the 'skipped' variable was not resetting, resulting significant errors for longer strings.
+
+Limited the number of indexes that can be jumped without severe penalty in score.
+
 v0.2 June 5th 2015
 
 URSA-enhanced now supports most error types and performs functionally with minimal bugs.  The predictions have all been done
