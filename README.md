@@ -64,10 +64,21 @@ print(score('URSA-enhanced can also accurately determine whether a word is not p
 0
 ```
 
-Using IPython, the above queries were timed and the following results illustrate a significant decrease in runtime due 
-to the efficiency of the algorithm.
+Using IPython, I took two queries from the examples within the readme in URSA and recorded their respective runtimes.  The
+results illustrate that it is possible to achieve up to a 50% decrease in runtime.
 
-*coming soon*
+```
+%timeit score('The quick brown fox jmuped over the lazy dog.','jumped')
+10000 loops, best of 3: 193 μs per loop
+```
+
+```
+%timeit score('Sally sells seashells down by the seaschore.','seashore')
+1000 loops, best of 3: 339 μs per loop
+```
+
+The first example demonstrated an approximate 30% decrease in runtime (193 μs compared to 307 μs), while the second example
+had an approximate 50% decrease in runtime (339 μs compared to 758 μs).
 
 #Why is this not a continuation of URSA?#
 
