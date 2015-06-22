@@ -65,7 +65,10 @@ print(score('URSA-enhanced can also accurately determine whether a word is not p
 ```
 
 Using IPython, I took two queries from the examples within the readme in URSA and recorded their respective runtimes.  The
-results illustrate that it is possible to achieve up to a 50% decrease in runtime.
+results illustrate that it is possible to achieve up to a 50% decrease in runtime.  On a per average basis, there is a 
+substantial decrease in runtime due to the elimination of many redundant processes involved in URSA and the efficiency 
+associated with the algorithm of URSA-enhanced.  Furthermore, significant (on the scale of >80%) decreases in runtime can
+be achieved when the substring is located within the first few indexes of the main string.
 
 ```
 %timeit score('The quick brown fox jmuped over the lazy dog.','jumped')
