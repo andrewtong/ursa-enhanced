@@ -64,11 +64,9 @@ print(score('URSA-enhanced can also accurately determine whether a word is not p
 0
 ```
 
-Using IPython, I took two queries from the examples within the readme in URSA and recorded their respective runtimes.  The
-results illustrate that it is possible to achieve up to a 50% decrease in runtime.  On a per average basis, there is a 
-substantial decrease in runtime due to the elimination of many redundant processes involved in URSA and the efficiency 
-associated with the algorithm of URSA-enhanced.  Furthermore, significant (on the scale of >80%) decreases in runtime can
-be achieved when the substring is located within the first few indexes of the main string.
+Using IPython, I took two queries from the examples within the readme in URSA and recorded their respective runtimes.  Based
+off a series of comparisons between URSA and URSA-enhanced, on average URSA-enhanced will outperform URSA in terms of 
+runtime by apporximately 200% (i.e. operates twice as fast).
 
 ```
 %timeit score('The quick brown fox jmuped over the lazy dog.','jumped')
@@ -81,7 +79,19 @@ be achieved when the substring is located within the first few indexes of the ma
 ```
 
 The first example demonstrated an approximate 30% decrease in runtime (193 μs compared to 307 μs), while the second example
-had an approximate 50% decrease in runtime (339 μs compared to 758 μs).
+had an approximate 50% decrease in runtime (339 μs compared to 758 μs).  On a per average basis, there is a 
+substantial decrease in runtime due to the elimination of many redundant processes involved in URSA and the efficiency 
+associated with the algorithm of URSA-enhanced.  A special case worth mentioning is that significant (on the scale of >80%) 
+decreases in runtime can be achieved when the substring is located within the first few indexes of the main string as 
+demonstrated in the following example.
+
+```
+%timeit score('Sally sells seashells down by the seashore.','Sally')
+10000 loops, best of 3: 90.1 μs per loop
+```
+
+Because the algorithm operates in linear-time complexity, runtime is expected to be primarily determined by where the 
+substring is located (if it is at all) within the main string. 
 
 #Why is this not a continuation of URSA?#
 
