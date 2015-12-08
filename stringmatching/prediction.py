@@ -10,202 +10,233 @@ from math import log10
 #Substring: The input that the user wants to know whether it exists within the string pattern.  In the above
 #example, it would be the word 'dog'/
 
-
 class CharacterInfo:
     def __init__(self,substring):
         self.substring = substring
-        self.lettervaluemap = CharacterInfo.scoreletters(self)
-        self.substringmap = CharacterInfo.mapsubstring(self)
+        self.letter_value_map = CharacterInfo.score_letters(self)
+        self.substring_map = CharacterInfo.map_substring(self)
         
-    def scoreletters(self):
+    def score_letters(self):
         i = 1
-        self.lettervaluemap = {}
+        self.letter_value_map = {}
         for char in self.substring:
-            if char not in self.lettervaluemap:
+            if char not in self.letter_value_map:
                 #The values associated with the letters must be unique to prevent dictionary key conflicts.
-                self.lettervaluemap[char] = (i + len(self.substring))*(i + len(self.substring)) - i
+                self.letter_value_map[char] = (i + len(self.substring))*(i + len(self.substring)) - i
                 i += 1
         
-        return self.lettervaluemap
+        return self.letter_value_map
                 
-    def getletterscore(self, letter):
-        if letter not in self.lettervaluemap:
+    def get_letter_score(self, letter):
+        if letter not in self.letter_value_map:
             return 0
         else:
-            return self.lettervaluemap[letter]
+            return self.letter_value_map[letter]
                 
-    def mapsubstring(self):
-        self.substringmap = {}        
+    def map_substring(self):
+        self.substring_map = {}        
         for j in range(0, len(self.substring)):
             try:
-                sumvalue = CharacterInfo.getletterscore(self, self.substring[j]) + CharacterInfo.getletterscore(self, self.substring[j+1])
-                diffvalue = CharacterInfo.getletterscore(self, self.substring[j]) - CharacterInfo.getletterscore(self, self.substring[j+1])
+                sum_value = CharacterInfo.get_letter_score(self, self.substring[j]) + CharacterInfo.get_letter_score(self, self.substring[j+1])
+                diff_value = CharacterInfo.get_letter_score(self, self.substring[j]) - CharacterInfo.get_letter_score(self, self.substring[j+1])
             except IndexError:
-                return self.substringmap
-            if (sumvalue, diffvalue) in self.substringmap:
-                self.substringmap[(sumvalue, diffvalue)].append(j + 1)
+                return self.substring_map
+            if (sum_value, diff_value) in self.substring_map:
+                self.substring_map[(sum_value, diff_value)].append(j + 1)
             else:
-                self.substringmap[(sumvalue, diffvalue)] = [j + 1]
-
+                self.substring_map[(sum_value, diff_value)] = [j + 1]            
+                
 def score(main, substring):
     result = compare(main, substring)
     
     if result < 0 or result > 2*len(substring):
         return 0
     else:
-        #return (1 - (result/(2*len(substring)))**2)/100
-        percentcorrect = max(5.0, 100*(1 - result/(1.5*len(substring))))
-        return int(100 - 76.87 * log10(100/percentcorrect))
+        percent_correct = max(5.0, 100*(1 - result/(1.5*len(substring))))
+        return int(100 - 76.87 * log10(100/percent_correct))
 
-def mapsubstring(substring):
+def map_substring(substring):
     #Now the substring needs to be interpreted as a score, using the above scoring convention in uniquelettervalues.
-    substringmap = {}
+    substring_map = {}
     for j in range(0,len(substring)):
         try:
-            sumvalue = substring[j] + substring[j + 1]
-            diffvalue = abs(substring[j] - substring[j + 1])
-            substringvalue = (sumvalue, diffvalue)
-            substringmap[j] = substringvalue
+            sum_value = substring[j] + substring[j + 1]
+            diff_value = abs(substring[j] - substring[j + 1])
+            substring_value = (sum_value, diff_value)
+            substring_map[j] = substring_value
         except IndexError:
-            substringvalue = (substring[j], substring[j])
-            substringmap[j] = substringvalue
-    return substringmap
+            substring_value = (substring[j], substring[j])
+            substring_map[j] = substring_value
+    return substring_map
 
 def compare(string,substring):
-    string = filterstringpattern(string)
+    string = filter_string_pattern(string)
     
     ci = CharacterInfo(substring)
-    basecopy = ci.substringmap
-    currentindex = 1
-    objectivescore = 0
+    base_copy = ci.substring_map
+    current_index = 1
+    objective_score = 0
     skipped = 0
     
-    #prevcharinfo (previous character letterscore, second previous character letterscore, previous index)
+    #prevcharinfo (previous character letter score, second previous character letter score, previous index)
     #at the new index, it calculates the new sum and difference
     #previous index is used to compare against current index, which subsequently produces a score
-    prevcharinfo = (-1, -1, 0)
+    prev_char_info = (-1, -1, 0)
 
     for char in string:
         
         #so if we are scanning the first letter in the main string, only the previous letterscore is found, and the 
         #algorithm moves to the next character
-        if prevcharinfo[0] is -1:
-            currentcharvalue = ci.getletterscore(char)
-            prevcharinfo = (currentcharvalue, -1, 0)
+        if prev_char_info[0] is -1:
+            current_char_value = ci.get_letter_score(char)
+            prev_char_info = (current_char_value, -1, 0)
             continue
         
         #if the current character is not the first letter, than a sum and diff value are calculated to check for accuracy
         #prev char info is updated depending on whether there is a match
         else:
-            currentcharvalue = ci.getletterscore(char)
-            sumvalue = prevcharinfo[0] + currentcharvalue
-            diffvalue = prevcharinfo[0] - currentcharvalue
+            current_char_value = ci.get_letter_score(char)
+            sum_value = prev_char_info[0] + current_char_value
+            diff_value = prev_char_info[0] - current_char_value
         
-        if (prevcharinfo[1] + currentcharvalue, prevcharinfo[1] - currentcharvalue) in ci.substringmap: 
-            if ci.substringmap[(prevcharinfo[1] + currentcharvalue, prevcharinfo[1] - currentcharvalue)][0]*prevcharinfo[2] is 1:
-                objectivescore = 0 #temp fix until i figure out this swap issue
-                sumvalue = prevcharinfo[1] + currentcharvalue
-                diffvalue = prevcharinfo[1] - currentcharvalue                
-                prevcharinfo = (prevcharinfo[1], 0, 0)
-                ci.substringmap = basecopy
+        if (prev_char_info[1] + current_char_value, prev_char_info[1] - current_char_value) in ci.substring_map: 
+            if ci.substring_map[(prev_char_info[1] + current_char_value, prev_char_info[1] - current_char_value)][0]*prev_char_info[2] is 1:
+                objective_score = 0 #temp fix until i figure out this swap issue
+                sum_value = prev_char_info[1] + current_char_value
+                diff_value = prev_char_info[1] - current_char_value                
+                prev_char_info = (prev_char_info[1], 0, 0)
+                ci.substring_map = base_copy
                 
         #check for correct position or if the position of within the substring        
-        if (sumvalue, diffvalue) in ci.substringmap:
-            if len(ci.substringmap[(sumvalue, diffvalue)]) > 1:
-                currentindex = ci.substringmap[(sumvalue, diffvalue)][0][0]
-                ci.substringmap[(sumvalue, diffvalue)].pop(0)
-            else:   
-                currentindex = ci.substringmap[(sumvalue, diffvalue)][0]
-
-            #index jump   
-            if currentindex - prevcharinfo[2] > 1 and currentindex - prevcharinfo[2] <= int(len(substring)/2):
-                objectivescore += (currentindex - prevcharinfo[2] - skipped/2)*1.2
-                prevcharinfo = (currentcharvalue, prevcharinfo[0], currentindex)    
-            #correct match exists, proceed to next index  
-            elif char is substring[currentindex]:
-                if currentindex is prevcharinfo[2]:
-                    objectivescore += 1.1
-                else:
-                    objectivescore += 0
-                prevcharinfo = (currentcharvalue, prevcharinfo[0], currentindex)
-            #search has not started, this index will be deemed as the first index, iff current index is less than 1/2 of the
-            #length of the substring
-            elif prevcharinfo[2] is 0 and currentindex <= 0.5*len(substring):
-
-                objectivescore += 1.5*(currentindex)
-                prevcharinfo = (currentcharvalue, 0, currentindex)
-            #substring search has started, but the index is out of place
-            else:
-                objectivescore += 2
-                prevcharinfo = (prevcharinfo[0], prevcharinfo[1], prevcharinfo[2])
+        if (sum_value, diff_value) in ci.substring_map:
+            result = check_valid_pattern_position(ci, char, sum_value, diff_value, prev_char_info, objective_score, substring, current_char_value, skipped)
+            current_index = result[0]
+            ci = result[1]
+            objective_score = result[2]
+            prev_char_info = result[3]
             
         #check for swapped position
-        elif (sumvalue, -diffvalue) in ci.substringmap: # and char is substring[currentindex] and prevcharinfo[0] is not -1:
-
-            if len(ci.substringmap[(sumvalue, -diffvalue)]) > 1:
-                currentindex = ci.substringmap[(sumvalue, -diffvalue)][0][0]
-                ci.substringmap[(sumvalue, -diffvalue)].pop(0)
-            else:
-                currentindex = ci.substringmap[(sumvalue, -diffvalue)][0]
-
-            sv = prevcharinfo[1] + currentcharvalue
-            dv = prevcharinfo[1] - currentcharvalue
-
-            if (sv, dv) in ci.substringmap:
-                objectivescore += 0.5*(currentindex - ci.substringmap[(sv, dv)][0])
-            else:
-                objectivescore += 1.5*(currentindex - prevcharinfo[2])
-                
-            #check if current index is 1 greater than previous index
-            prevcharinfo = (ci.getletterscore(substring[currentindex]), ci.getletterscore(substring[currentindex - 1]), currentindex)
-            
+        elif (sum_value, -diff_value) in ci.substring_map: # and char is substring[currentindex] and prevcharinfo[0] is not -1:
+            result = check_swapped_position_pattern(ci, sum_value, diff_value, prev_char_info, objective_score, substring, current_char_value)
+            current_index = result[0]
+            ci = result[1]
+            objective_score = result[2]
+            prev_char_info = result[3] 
+             
         #performs a one off check (typically where there is a misc. letter in between two correctly positioned letters)
-        elif (prevcharinfo[1] + currentcharvalue, prevcharinfo[1] - currentcharvalue) in ci.substringmap:
-            if len(ci.substringmap[(prevcharinfo[1] + currentcharvalue, prevcharinfo[1] - currentcharvalue)]) > 1:
-                currentindex = ci.substringmap[(prevcharinfo[1] + currentcharvalue, prevcharinfo[1] - currentcharvalue)][0][0]
-                ci.substringmap[(prevcharinfo[1] + currentcharvalue, prevcharinfo[1] - currentcharvalue)].pop(0)
-            else:
-                currentindex = ci.substringmap[(prevcharinfo[1] + currentcharvalue, prevcharinfo[1] - currentcharvalue)][0]
-            objectivescore += 1
-            prevcharinfo = (currentcharvalue, prevcharinfo[1], currentindex)
+        elif (prev_char_info[1] + current_char_value, prev_char_info[1] - current_char_value) in ci.substring_map:
+            result = check_one_off_pattern(ci, prev_char_info, objective_score, current_char_value)
+            current_index = result[0]
+            ci = result[1]
+            objective_score = result[2]
+            prev_char_info = result[3] 
         
         #case where current character is incorrect, but search has began
-        elif char is not substring[currentindex + 1] and prevcharinfo[0] > 0:
-            if currentcharvalue > 0:
-                objectivescore += 0.8 + skipped*0.5
-                prevcharinfo = (currentcharvalue, prevcharinfo[0], prevcharinfo[2] + 1)
-            else:
-                objectivescore += 1.8 + skipped*0.3
-            
+        elif char is not substring[current_index + 1] and prev_char_info[0] > 0:
+            objective_score, prev_char_info = check_invalid_char_pattern(current_char_value, objective_score, skipped, prev_char_info)
             skipped += 2
 
-            if skipped + currentindex + 1 >= len(substring) and currentindex >= 0.5*len(substring):
-                return objectivescore    
+            if skipped + current_index + 1 >= len(substring) and current_index >= 0.5*len(substring):
+                return objective_score    
         else: 
-            currentindex = 0
-            objectivescore = 0
-            prevcharinfo = (currentcharvalue, 0, currentindex)
-            ci.substringmap = basecopy
+            current_index = 0
+            objective_score = 0
+            prev_char_info = (current_char_value, 0, current_index)
+            ci.substring_map = base_copy
 
     
-        if currentindex is len(substring) - 1:
+        if current_index is len(substring) - 1:
             #the check for the last two letters is performed, if the last letter doesn't exist, it would count as a one off anyways
-            return objectivescore
+            return objective_score
         
-        if objectivescore >= 1.5*len(substring):
-            
-            prevcharinfo = (currentcharvalue, 0, 0)
-            objectivescore = 0
-            ci.substringmap = basecopy
+        if objective_score >= 1.5*len(substring):  
+            prev_char_info = (current_char_value, 0, 0)
+            objective_score = 0
+            ci.substring_map = base_copy
             skipped = 0
         
     #if no match is found
     return -1
 
-       
+def check_valid_pattern_position(ci, char, sum_value, diff_value, prev_char_info, objective_score, substring, current_char_value, skipped):
+    if len(ci.substring_map[(sum_value, diff_value)]) > 1:
+        current_index = ci.substring_map[(sum_value, diff_value)][0][0]
+        ci.substring_map[(sum_value, diff_value)].pop(0)
+    else:   
+        current_index = ci.substring_map[(sum_value, diff_value)][0]
+
+    #index jump   
+    if current_index - prev_char_info[2] > 1 and current_index - prev_char_info[2] <= int(len(substring)/2):
+        objective_score += (current_index - prev_char_info[2] - skipped/2)*1.2
+        prev_char_info = (current_char_value, prev_char_info[0], current_index)    
+    #correct match exists, proceed to next index  
+    elif char is substring[current_index]:
+        if current_index is prev_char_info[2]:
+            objective_score += 1.1
+        else:
+            objective_score += 0
+        prev_char_info = (current_char_value, prev_char_info[0], current_index)
+    #search has not started, this index will be deemed as the first index, iff current index is less than 1/2 of the
+    #length of the substring
+    elif prev_char_info[2] is 0 and current_index <= 0.5*len(substring):
+
+        objective_score += 1.5*(current_index)
+        prev_char_info = (current_char_value, 0, current_index)
+    #substring search has started, but the index is out of place
+    else:
+        objective_score += 2
+        prev_char_info = (prev_char_info[0], prev_char_info[1], prev_char_info[2])
+        
+    return (current_index, ci, objective_score, prev_char_info)
+
+def check_swapped_position_pattern(ci, sum_value, diff_value, prev_char_info, objective_score, substring, current_char_value):
+    if len(ci.substring_map[(sum_value, -diff_value)]) > 1:
+        current_index = ci.substring_map[(sum_value, -diff_value)][0][0]
+        ci.substring_map[(sum_value, -diff_value)].pop(0)
+    else:
+        current_index = ci.substring_map[(sum_value, -diff_value)][0]
+
+    sv = prev_char_info[1] + current_char_value
+    dv = prev_char_info[1] - current_char_value
+
+    if (sv, dv) in ci.substring_map:
+        objective_score += 0.5*(current_index - ci.substring_map[(sv, dv)][0])
+    else:
+        objective_score += 1.5*(current_index - prev_char_info[2])
+        
+    #check if current index is 1 greater than previous index
+    prev_char_info = (ci.get_letter_score(substring[current_index]), ci.get_letter_score(substring[current_index - 1]), current_index)
+    return (current_index, ci, objective_score, prev_char_info)
+
+def check_one_off_pattern(ci, prev_char_info, objective_score, current_char_value):
+    if len(ci.substring_map[(prev_char_info[1] + current_char_value, prev_char_info[1] - current_char_value)]) > 1:
+        current_index = ci.substring_map[(prev_char_info[1] + current_char_value, prev_char_info[1] - current_char_value)][0][0]
+        ci.substring_map[(prev_char_info[1] + current_char_value, prev_char_info[1] - current_char_value)].pop(0)
+    else:
+        current_index = ci.substring_map[(prev_char_info[1] + current_char_value, prev_char_info[1] - current_char_value)][0]
+    objective_score += 1
+    prev_char_info = (current_char_value, prev_char_info[1], current_index)
+    
+    return (current_index, ci, objective_score, prev_char_info)
+
+def check_invalid_char_pattern(current_char_value, objective_score, skipped, prev_char_info):
+    if current_char_value > 0:
+        objective_score += 0.8 + skipped*0.5
+        prev_char_info = (current_char_value, prev_char_info[0], prev_char_info[2] + 1)
+    else:
+        objective_score += 1.8 + skipped*0.3
+        
+    return (objective_score, prev_char_info)
+
 #This function filters out irrelevant characters from the string pattern
-def filterstringpattern(strg):
+def filter_string_pattern(strg):
     words = sub(r'[^\w\s]','',strg) #Remove all punctuation
     words = words.replace(' ','') #Removes spaces between words
     words = words.lower()  #Turn all capital letters to lower letters
     return words
+
+#print(score('URSA-enhanced is capable of performing fuzzy string matches at remarkable speeds.', 'fuzzy'))
+#print(score('Similar to URSA, basic errors can easily be recgnized.', 'recognized'))
+#print(score('Errors of higher comlpexty are now solved faster with the same precise accuracy.', 'complexity'))
+#print(score('URSA-enhanced can also accurately determine whether a word is not present.', 'python'))
+#print(score('Sesahells are slod down by the seacshore by Slally.','seashore'))
