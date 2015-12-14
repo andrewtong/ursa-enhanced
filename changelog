@@ -1,3 +1,12 @@
+v0.3.1.0
+
+Reduction of function lengths to improve clarity.  New functions introduced to shorten overall function lengths such that they
+can be much more easily read.
+
+Variable/Function names altered to improve readability and to be more alligned with Python standards.
+
+Sample usage added in commented text within code.
+
 v0.3
 
 Corrected the hashmap to handle duplicate letters by resetting the map keys whenever a failed check occurs, which prevents
